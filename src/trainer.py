@@ -1,4 +1,4 @@
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import torch
 import csv
 import os
@@ -18,11 +18,12 @@ def train_model(model, train_loader, test_loader, device, criterion, optimizer, 
     best_acc = 0.0
 
     # model training
+    print(f"STARTING TRAINING LOOP FOR MODEL {config['model_name']}")
     for epoch in range(config['epochs']):
         model.train()
         total_loss = 0
-        
-        loop = tqdm(train_loader, desc=f"Epoch {epoch+1}/{config['epochs']}", leave=False)
+
+        loop = tqdm(train_loader, desc = f"Epoch {epoch+1}/{config['epochs']}", leave = False)
         for images, labels in train_loader:
             images, labels = images.to(device), labels.squeeze().to(device)
             optimizer.zero_grad()
@@ -31,11 +32,14 @@ def train_model(model, train_loader, test_loader, device, criterion, optimizer, 
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
+
+            loop.set_postfix(loss = loss.item())
             
         scheduler.step()
         avg_train_loss = total_loss / len(train_loader)
         current_lr = scheduler.get_last_lr()[0]
 
+        print(f"STARTING EVALUATING AFTER EPOCH {epoch}")
         model.eval()
         correct, total = 0, 0
         with torch.no_grad():
@@ -45,6 +49,8 @@ def train_model(model, train_loader, test_loader, device, criterion, optimizer, 
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
+        print(f"FINISHED EVALUATING AFTER EPOCH {epoch}")
+        
 
         test_accuracy = 100 * correct / total
         
@@ -58,3 +64,6 @@ def train_model(model, train_loader, test_loader, device, criterion, optimizer, 
             writer.writerow([epoch + 1, avg_train_loss, test_accuracy, current_lr])
 
         print(f"Epoch {epoch+1}/{config['epochs']} | Loss: {avg_train_loss:.4f} | Acc: {test_accuracy:.2f}% | LR: {current_lr:.7f}")
+
+    print(f"FINISHED TRAINING LOOP FOR MODEL {config['model_name']}")
+    
