@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import torch
 import csv
 import os
@@ -21,6 +22,7 @@ def train_model(model, train_loader, test_loader, device, criterion, optimizer, 
         model.train()
         total_loss = 0
         
+        loop = tqdm(train_loader, desc=f"Epoch {epoch+1}/{config['epochs']}", leave=False)
         for images, labels in train_loader:
             images, labels = images.to(device), labels.squeeze().to(device)
             optimizer.zero_grad()

@@ -7,9 +7,19 @@ def get_dataloaders(batch_size: int, transform):
     train_dataset = PathMNIST(split = 'train', transform = transform, download = True)
     # creates an iterator that fetches images, applies transforms, and groups
     # them into [batch_size] tensors during the training loop
-    train_loader = DataLoader(dataset = train_dataset, batch_size = batch_size, shuffle = True)
+    train_loader = DataLoader(
+        dataset = train_dataset, 
+        batch_size = batch_size, 
+        shuffle = True,
+        num_workers = 2,
+        pin_memory = True)
 
     test_dataset = PathMNIST(split = 'test', transform = transform, download = True)
-    test_loader = DataLoader(dataset = test_dataset, batch_size = batch_size, shuffle = False)
+    test_loader = DataLoader(
+        dataset = test_dataset, 
+        batch_size = batch_size, 
+        shuffle = False,
+        num_workers = 2,
+        pin_memory = True)
 
     return train_loader, test_loader
